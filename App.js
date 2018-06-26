@@ -12,6 +12,7 @@ class App extends React.Component {
     constructor() {
         super()
         this.state = {
+            roomId: null,
             messages: [],
             joinableRooms: [],
             joinedRooms: []
@@ -35,7 +36,6 @@ class App extends React.Component {
       .then(currentUser => {
           this.currentUser = currentUser
           this.getRooms()
-          this.subscribeToRoom()
       })
       .catch(err => console.log('error on connecting: ', errr))
 
@@ -49,10 +49,12 @@ class App extends React.Component {
         joinedRooms: this.currentUser.rooms
     })
 })
-.catch(err => console.log('error on joinableRooms: ', errr))
-    }
+.catch(err => console.log('error on joinableRooms: ', err))
+}
 
     subscribeToRoom(roomId) {
+        this.setState.messages({ messages: [] })
+        this.currentUser.subscribeToRoom({
         roomId: roomId,
        // messageLimit: 20, // set message limit per room - default 20
         hooks: {
@@ -63,12 +65,19 @@ class App extends React.Component {
             }
         }
     })
-    }
+    .then(room => {
+        this.setState({
+            roomId: room.id
+        })
+        this.getRooms()
+    })
+    .catch(err => console.log('error on subscribing to room: ', err)
+}
 
     snedMessage(text) {
         this.currentUser.sendMessage({
             text,
-            roomId: 10328672
+            roomId: this.state.roomId
         })
     }
 
@@ -76,6 +85,7 @@ class App extends React.Component {
         return (
             <div className="app">
                 <RoomList
+                    roomId={this.state.roomId}
                     subscribeToRoom={this.subscribeToRoom}
                     rooms={[...this.state.joinableRooms, ...this.state.joinedRooms]} />
                 <MessageList messages={this.state.messages} />
